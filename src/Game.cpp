@@ -1,7 +1,12 @@
 #include "Controller.h"
+#include "Game.h"
+#include "Maps.h"
 #include <iostream>
 #include <windows.h>
 #include <cstdlib>
+
+int CurrentMap = -1;
+std::vector<std::string> Level;
 
 bool choice_user()
 {
@@ -31,5 +36,13 @@ void menu()
     std::cout << "  ONE PLAYER" << "\n";
     std::cout << "  TWO PLAYERS";
     choice_user();
-    
+    LoadMap();
+}
+
+void LoadMap()
+{
+    CurrentMap +=1;
+    Level = Maps[CurrentMap]; //Подгружает из Maps.h нужный уровень
+    for (int i = 0; i < std::size(Level); i++) //Печатает уровень в консоль
+        std::cout << Level[i] << "\n";
 }
