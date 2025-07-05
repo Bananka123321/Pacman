@@ -1,0 +1,32 @@
+[
+{
+  "directory": "Z:/$TPU/Projects/Pacman/build",
+  "command": "Z:\\msys\\mingw64\\bin\\c++.exe -g -o CMakeFiles\\Pacman.dir\\main.cpp.obj -c Z:\\$$TPU\\Projects\\Pacman\\main.cpp",
+  "file": "Z:\\$TPU\\Projects\\Pacman\\main.cpp",
+  "output": "CMakeFiles\\Pacman.dir\\main.cpp.obj"
+},
+{
+  "directory": "Z:/$TPU/Projects/Pacman/build",
+  "command": "Z:\\msys\\mingw64\\bin\\c++.exe -g -o CMakeFiles\\Pacman.dir\\src\\Controller.cpp.obj -c Z:\\$$TPU\\Projects\\Pacman\\src\\Controller.cpp",
+  "file": "Z:\\$TPU\\Projects\\Pacman\\src\\Controller.cpp",
+  "output": "CMakeFiles\\Pacman.dir\\src\\Controller.cpp.obj"
+},
+{
+  "directory": "Z:/$TPU/Projects/Pacman/build",
+  "command": "Z:\\msys\\mingw64\\bin\\c++.exe -g -o CMakeFiles\\Pacman.dir\\src\\Game.cpp.obj -c Z:\\$$TPU\\Projects\\Pacman\\src\\Game.cpp",
+  "file": "Z:\\$TPU\\Projects\\Pacman\\src\\Game.cpp",
+  "output": "CMakeFiles\\Pacman.dir\\src\\Game.cpp.obj"
+},
+{
+  "directory": "Z:/$TPU/Projects/Pacman/build",
+  "command": "Z:\\msys\\mingw64\\bin\\c++.exe -g -o CMakeFiles\\Pacman.dir\\src\\Player.cpp.obj -c Z:\\$$TPU\\Projects\\Pacman\\src\\Player.cpp",
+  "file": "Z:\\$TPU\\Projects\\Pacman\\src\\Player.cpp",
+  "output": "CMakeFiles\\Pacman.dir\\src\\Player.cpp.obj"
+},
+{
+  "directory": "Z:/$TPU/Projects/Pacman/build",
+  "command": "Z:\\msys\\mingw64\\bin\\c++.exe -g -o CMakeFiles\\Pacman.dir\\src\\Maps.cpp.obj -c Z:\\$$TPU\\Projects\\Pacman\\src\\Maps.cpp",
+  "file": "Z:\\$TPU\\Projects\\Pacman\\src\\Maps.cpp",
+  "output": "CMakeFiles\\Pacman.dir\\src\\Maps.cpp.obj"
+}
+]
