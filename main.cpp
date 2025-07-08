@@ -9,9 +9,12 @@
 
 int main()
 {
-    system("cls");
-    menu();
+    Menu();
 
     int x = 4, y = 1;
     Movement(x,y);
+
+    system("cls");
+    std::cout << score;
+    std::cin >> x;
 }
