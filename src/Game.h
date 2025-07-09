@@ -2,8 +2,8 @@
 #include <vector>
 #include <string>
 
-bool choice_user();
-void menu();
+bool ChoiceUser();
+void Menu();
 void LoadMap();//Загрузка уровня
 
 extern int CurrentMap;//Счётчик пройденных уровней

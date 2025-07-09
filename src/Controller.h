@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 
-void gotoxy(int x, int y);
+extern unsigned int score;
+
+void GoToxy(int x, int y);
 bool IsWall(int x, int y);//Проверяет есть ли стена
-bool Movement(int &x, int &y);
+void Movement(int &x, int &y);
