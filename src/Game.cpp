@@ -25,7 +25,7 @@ bool ChoiceUser()
     return choice;                      
 }
 
-void Menu()
+int Menu()
 {
     std::cout << "  PLAY" << "\n";
     std::cout << "  EXIT";
@@ -35,9 +35,11 @@ void Menu()
     system("cls");
     std::cout << "  ONE PLAYER" << "\n";
     std::cout << "  TWO PLAYERS";
-    ChoiceUser();
+    bool TwoPlayers = ChoiceUser();
     system("cls");
+    
     LoadMap();
+    return TwoPlayers ? 2 : 1;
 }
 
 void LoadMap()
