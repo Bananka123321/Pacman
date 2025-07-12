@@ -6,6 +6,23 @@
 
 unsigned int score = 0;
 
+void DrawScore(int score_row, unsigned int score1, unsigned int score2, int players)
+{
+    GoToxy(0, score_row);
+    if (players == 1)
+        std::cout << "Score: " << score1 << "    ";
+    else
+        std::cout << "P1: " << score1 << "   P2: " << score2;
+}
+
+void CollectPoint(Player& p, std::vector<std::string>& level)
+{
+    if (level[p.y][p.x] == '.'){
+        level[p.y][p.x] = ' ';
+        ++p.score;
+    }
+}
+
 void GoToxy(int x, int y)
 {
     COORD coord = {(short)x, (short)y};
@@ -17,20 +34,12 @@ bool IsWall(int x, int y)
     return Level[y][x] == '#';
 }
 
-bool IsPoint(int x, int y)
-{
-    if (Level[y][x] == '.')
-    {
-        Level[y][x] = ' ';
-        return true;
-    }
-    return false;
-}
-
 void Movement(int players, int &x1, int &y1, int &x2, int &y2)
 {
     Player p1 = {x1, y1, 1, 0, '@'};
-    Player p2 = {x2, y2, 0, 0, 'X'};
+    Player p2 = {x2, y2, -1, 0, 'X'};
+
+    int score_row = Level.size();   //строка, в которой пишем очки
 
     while (!(GetAsyncKeyState(VK_ESCAPE) & 0x8000))
     {
@@ -74,11 +83,15 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
             if (players == 2) { p2.x = tx2; p2.y = ty2; }
         }
 
+        CollectPoint(p1, Level);
 
         GoToxy(p1.x, p1.y); std::cout << p1.icon;
         if (players == 2) {
+            CollectPoint(p2, Level);
             GoToxy(p2.x, p2.y); std::cout << p2.icon;
         }
+        
+        DrawScore(score_row, p1.score, p2.score, players);
 
         Sleep(150);
     }
