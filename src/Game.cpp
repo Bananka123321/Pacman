@@ -8,15 +8,15 @@
 int CurrentMap = -1;
 std::vector<std::string> Level;
 
-bool choice_user()
+bool ChoiceUser()
 {
     bool choice = 0; // Выбор пользователя 0 - PLAY, 1 - EXIT
     while(!(GetAsyncKeyState(VK_RETURN) & 0x8000 || (GetAsyncKeyState(VK_ESCAPE) & 0x8000))) // Выход из цикла на ESC, ENTER
     {
-        gotoxy(0,choice);
+        GoToxy(0,choice);
         std::cout << ">";
         Sleep(100);
-        gotoxy(0,choice);
+        GoToxy(0,choice);
         std::cout << " ";
         
         if ((GetAsyncKeyState(VK_UP) & 0x8000) || (GetAsyncKeyState(VK_DOWN) & 0x8000)) 
@@ -25,18 +25,21 @@ bool choice_user()
     return choice;                      
 }
 
-void menu()
+int Menu()
 {
     std::cout << "  PLAY" << "\n";
     std::cout << "  EXIT";
-    if (choice_user())
+    if (ChoiceUser())
         exit(0);
     Sleep(100);
     system("cls");
     std::cout << "  ONE PLAYER" << "\n";
     std::cout << "  TWO PLAYERS";
-    choice_user();
+    bool TwoPlayers = ChoiceUser();
+    system("cls");
+    
     LoadMap();
+    return TwoPlayers ? 2 : 1;
 }
 
 void LoadMap()

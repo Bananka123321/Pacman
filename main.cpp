@@ -10,8 +10,9 @@
 int main()
 {
     system("cls");
-    menu();
+    int players = Menu();
+    int x1 = 4, y1 = 1;
+    int x2 = 4, y2 = 1;
 
-    int x = 4, y = 1;
-    Movement(x,y);
+    Movement(players, x1, y1, x2, y2);
 }
