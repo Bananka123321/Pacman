@@ -3,7 +3,7 @@
 #include <string>
 
 bool ChoiceUser();
-void Menu();
+int Menu();
 void LoadMap();//Загрузка уровня
 
 extern int CurrentMap;//Счётчик пройденных уровней
