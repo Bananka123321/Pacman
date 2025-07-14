@@ -37,26 +37,38 @@ bool IsWall(int x, int y)
 void Movement(int players, int &x1, int &y1, int &x2, int &y2)
 {
     Player p1 = {x1, y1, 1, 0, '@'};
-    Player p2 = {x2, y2, -1, 0, 'X'};
+    Player p2 = {players == 2 ? x2 : 0, players == 2 ? y2 : 0, -1, 0, 'X'};
 
     int score_row = Level.size();   //строка, в которой пишем очки
 
     while (!(GetAsyncKeyState(VK_ESCAPE) & 0x8000))
     {
-        if (GetAsyncKeyState(VK_UP)    & 0x8000) { p1.dx = 0;  p1.dy = -1; }
-        if (GetAsyncKeyState(VK_DOWN)  & 0x8000) { p1.dx = 0;  p1.dy =  1; }
-        if (GetAsyncKeyState(VK_LEFT)  & 0x8000) { p1.dx = -1; p1.dy =  0; }
-        if (GetAsyncKeyState(VK_RIGHT) & 0x8000) { p1.dx = 1;  p1.dy =  0; }
 
-        if (players == 2) {
-            if (GetAsyncKeyState('W') & 0x8000) { p2.dx = 0;  p2.dy = -1; }
-            if (GetAsyncKeyState('S') & 0x8000) { p2.dx = 0;  p2.dy =  1; }
-            if (GetAsyncKeyState('A') & 0x8000) { p2.dx = -1; p2.dy =  0; }
-            if (GetAsyncKeyState('D') & 0x8000) { p2.dx = 1;  p2.dy =  0; }
+        if (!IsWall(p1.x, p1.y))
+        {
+            GoToxy(p1.x, p1.y); 
+            std::cout << ' ';
+        }
+        if (players == 2 && !IsWall(p2.x, p2.y))
+        {
+            GoToxy(p2.x, p2.y); 
+            std::cout << ' ';
         }
 
-        GoToxy(p1.x, p1.y); std::cout << ' ';
-        if (players == 2)   GoToxy(p2.x, p2.y); std::cout << ' ';
+
+        if (GetAsyncKeyState(VK_UP)    & 0x8000 && !IsWall(p1.x, p1.y - 1)) { p1.dx = 0;  p1.dy = -1; }
+        if (GetAsyncKeyState(VK_DOWN)  & 0x8000 && !IsWall(p1.x, p1.y + 1)) { p1.dx = 0;  p1.dy =  1; }
+        if (GetAsyncKeyState(VK_LEFT)  & 0x8000 && !IsWall(p1.x - 1, p1.y)) { p1.dx = -1; p1.dy =  0; }
+        if (GetAsyncKeyState(VK_RIGHT) & 0x8000 && !IsWall(p1.x + 1, p1.y)) { p1.dx = 1;  p1.dy =  0; }
+
+        if (players == 2) {
+            if (GetAsyncKeyState('W') & 0x8000 && !IsWall(p2.x, p2.y - 1)) { p2.dx = 0;  p2.dy = -1; }
+            if (GetAsyncKeyState('S') & 0x8000 && !IsWall(p2.x, p2.y + 1)) { p2.dx = 0;  p2.dy =  1; }
+            if (GetAsyncKeyState('A') & 0x8000 && !IsWall(p2.x - 1, p2.y)) { p2.dx = -1; p2.dy =  0; }
+            if (GetAsyncKeyState('D') & 0x8000 && !IsWall(p2.x + 1, p2.y)) { p2.dx = 1;  p2.dy =  0; }
+        }
+
+
 
         //Следующие клетки 1 и 2 игрока
         int nx1 = p1.x + p1.dx, ny1 = p1.y + p1.dy;
@@ -90,9 +102,15 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
             CollectPoint(p2, Level);
             GoToxy(p2.x, p2.y); std::cout << p2.icon;
         }
-        
+
         DrawScore(score_row, p1.score, p2.score, players);
 
         Sleep(150);
+
+        if (GetAsyncKeyState('P') & 0x0001)
+        {
+            while(!(GetAsyncKeyState('P') & 0x0001))
+            {}
+        }
     }
 }
