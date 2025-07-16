@@ -17,4 +17,15 @@ struct Player {
     unsigned int score = 0;//Счёт каждого игрока
 };
 
+struct Ghost {
+    int x, y;
+    int dx, dy;
+    char icon;
+    int type;// 0 - Red, 1 - Pink, 2 - Blue, 3 - Yellow
+};
+
+struct Dir { int dx, dy; };
+
+void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players);
+
 void CollectPoint(Player& p, const std::vector<std::string>& level);

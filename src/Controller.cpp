@@ -13,6 +13,18 @@ void DrawScore(int score_row, unsigned int score1, unsigned int score2, int play
         std::cout << "Score: " << score1 << "    ";
     else
         std::cout << "P1: " << score1 << "   P2: " << score2;
+
+    if (score1+score2 == 436)//вроде 436 точек на карте
+    {
+        system("cls");
+        GoToxy(50, Level.size() / 2);
+        std::cout << "CONGRATULATIONS!";//Здесь сделаем запуск следующего уровня по таймеру или нажатию enter
+        while (true)
+        {
+        }
+        
+    }
+    
 }
 
 void CollectPoint(Player& p, std::vector<std::string>& level)
@@ -38,6 +50,10 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
 {
     Player p1 = {x1, y1, 1, 0, '@'};
     Player p2 = {players == 2 ? x2 : 0, players == 2 ? y2 : 0, -1, 0, 'X'};
+
+    std::vector<Ghost> ghosts;
+    ghosts.push_back({19, 11, 0, 0, 'R', 0});//Пока только красный
+
 
     int score_row = Level.size();   //строка, в которой пишем очки
 
@@ -67,8 +83,6 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
             if (GetAsyncKeyState('A') & 0x8000 && !IsWall(p2.x - 1, p2.y)) { p2.dx = -1; p2.dy =  0; }
             if (GetAsyncKeyState('D') & 0x8000 && !IsWall(p2.x + 1, p2.y)) { p2.dx = 1;  p2.dy =  0; }
         }
-
-
 
         //Следующие клетки 1 и 2 игрока
         int nx1 = p1.x + p1.dx, ny1 = p1.y + p1.dy;
@@ -105,6 +119,8 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
 
         DrawScore(score_row, p1.score, p2.score, players);
 
+        MoveGhosts(ghosts, p1, p2, players);
+
         Sleep(150);
 
         if (GetAsyncKeyState('P') & 0x0001)
@@ -112,5 +128,66 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
             while(!(GetAsyncKeyState('P') & 0x0001))
             {}
         }
+    }
+}
+
+void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players)
+{
+    for (Ghost& g : ghosts)
+    {
+        //Очистка предыдущей позиции призрака
+        if (!IsWall(g.x, g.y)) {
+            GoToxy(g.x, g.y);
+            std::cout << Level[g.y][g.x];
+        }
+
+        //Преследование ближайшего игрока
+        int tx = p1.x;
+        int ty = p1.y;
+        if (players == 2) {
+            int dist1 = std::abs(g.x - p1.x) + std::abs(g.y - p1.y);
+            int dist2 = std::abs(g.x - p2.x) + std::abs(g.y - p2.y);
+            if (dist2 < dist1) {
+                tx = p2.x;
+                ty = p2.y;
+            }
+        }
+
+        //Направления
+        std::vector<Dir> directions = {
+            {0, -1},
+            {-1, 0},
+            {1, 0},
+            {0, 1}
+        };
+
+        //Выбираем быстрейшее направление до игрока
+        int bestDx = 0, bestDy = 0;
+        int minDist = 100000;
+        for (Dir d : directions) {
+            int nx = g.x + d.dx;
+            int ny = g.y + d.dy;
+            if (!IsWall(nx, ny)) {
+                int dist = std::abs(nx - tx) + std::abs(ny - ty);
+                if (dist < minDist) {
+                    minDist = dist;
+                    bestDx = d.dx;
+                    bestDy = d.dy;
+                }
+            }
+        }
+
+        g.x += bestDx;
+        g.y += bestDy;
+
+        if ((g.x == p1.x && g.y == p1.y) || (players == 2 && g.x == p2.x && g.y == p2.y)) {
+            GoToxy(0, Level.size() + 3);
+            std::cout << "Game Over!";
+            Sleep(2000);
+            exit(0);
+        }
+
+        GoToxy(g.x, g.y);
+        std::cout << g.icon;
     }
 }
