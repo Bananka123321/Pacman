@@ -6,6 +6,23 @@
 
 unsigned int score = 0;
 
+int offsetX = 0;
+int offsetY = 0;
+
+long GetConsoleWidth()//Получаем ширину консоли
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+}
+
+long GetConsoleHeight()//Получаем высоту консоли
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+}
+
 bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int players)
 {
     GoToxy(0, score_row);
@@ -18,7 +35,7 @@ bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int play
     {
         system("cls");
         GoToxy(50, Level.size() / 2);
-        std::cout << "CONGRATULATIONS!";//Здесь сделаем запуск следующего уровня по таймеру или нажатию enter
+        std::cout << "CONGRATULATIONS!";
         Sleep(5000);
         return true;
     }
@@ -35,7 +52,7 @@ void CollectPoint(Player& p, std::vector<std::string>& level)
 
 void GoToxy(int x, int y)
 {
-    COORD coord = {(short)x, (short)y};
+    COORD coord = {(short)(x + offsetX), (short)(y + offsetY)};
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
@@ -53,10 +70,10 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
     bool p2Alive = (players == 2);
 
     std::vector<Ghost> ghosts;
-    ghosts.push_back({23, 13, 0, 0, 'R', 0});  //Red
-    ghosts.push_back({19, 13, 0, 0, 'P', 0});  //Pink
-    ghosts.push_back({17, 13, 0, 0, 'B', 0});  //Blue
-    ghosts.push_back({21, 13, 0, 0, 'Y', 0});  //Yellow
+    ghosts.push_back({15, 11, 0, 0, 'R', 0});  //Red
+    ghosts.push_back({17, 11, 0, 0, 'P', 0});  //Pink
+    ghosts.push_back({19, 11, 0, 0, 'B', 0});  //Blue
+    ghosts.push_back({21, 11, 0, 0, 'Y', 0});  //Yellow
 
 
     int score_row = Level.size();   //строка, в которой пишем очки

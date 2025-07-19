@@ -9,9 +9,12 @@
 
 int main()
 {
+    system("mode con: cols=150 lines=40");//Pазмер консоли
     while (true)
     {
         system("cls");
+        offsetX = GetConsoleWidth() / 2;
+        offsetY = GetConsoleHeight() / 2;
         int players = Menu();//Выбор количества игроков
         CurrentMap = -1;//Сброс на первый уровень
 
@@ -21,9 +24,12 @@ int main()
             if (CurrentMap >= 10) {
                 break; //Возвращаемся в меню
             }
-
+            
+            system("cls");
+            
             LoadMap();
-
+            DrawFruitDescriptions();
+            
             int x1 = 4, y1 = 1;
             int x2 = 4, y2 = 1;
 
