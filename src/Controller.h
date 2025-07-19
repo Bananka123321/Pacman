@@ -29,3 +29,9 @@ struct Dir { int dx, dy; };
 bool MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players, bool& p1Alive, bool& p2Alive);
 
 void CollectPoint(Player& p, const std::vector<std::string>& level);
+
+long GetConsoleWidth();
+long GetConsoleHeight();
+
+extern int offsetX;
+extern int offsetY;
