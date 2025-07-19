@@ -22,7 +22,7 @@ void DrawScore(int score_row, unsigned int score1, unsigned int score2, int play
         while (true)
         {
         }
-        
+
     }
     
 }
@@ -52,7 +52,10 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
     Player p2 = {players == 2 ? x2 : 0, players == 2 ? y2 : 0, -1, 0, 'X'};
 
     std::vector<Ghost> ghosts;
-    ghosts.push_back({19, 11, 0, 0, 'R', 0});//Пока только красный
+    ghosts.push_back({23, 13, 0, 0, 'R', 0});  //Red
+    ghosts.push_back({19, 13, 0, 0, 'P', 0});  //Pink
+    ghosts.push_back({17, 13, 0, 0, 'B', 0});  //Blue
+    ghosts.push_back({21, 13, 0, 0, 'Y', 0});  //Yellow
 
 
     int score_row = Level.size();   //строка, в которой пишем очки
@@ -142,17 +145,52 @@ void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, 
         }
 
         //Преследование ближайшего игрока
-        int tx = p1.x;
-        int ty = p1.y;
-        if (players == 2) {
-            int dist1 = std::abs(g.x - p1.x) + std::abs(g.y - p1.y);
-            int dist2 = std::abs(g.x - p2.x) + std::abs(g.y - p2.y);
-            if (dist2 < dist1) {
-                tx = p2.x;
-                ty = p2.y;
-            }
-        }
+        int tx = p1.x, ty = p1.y;
 
+        // Общая логика ближайшего игрока (для Inky и Clyde)
+        int gx = g.x, gy = g.y;
+        const Player* target = &p1;
+        if (players == 2) {
+            int dist1 = std::abs(gx - p1.x) + std::abs(gy - p1.y);
+            int dist2 = std::abs(gx - p2.x) + std::abs(gy - p2.y);
+            target = (dist2 < dist1) ? &p2 : &p1;
+        }
+        switch (g.icon) {
+            case 'R': //Red, просто идёт за ближайшим игроком
+                tx = target->x;
+                ty = target->y;
+                break;
+
+            case 'P': //Pink, пытается обогнать игрока, идёт вперёд на 4 клетки по направлению движения игрока
+                tx = target->x + 4 * target->dx;
+                ty = target->y + 4 * target->dy;
+                break;
+
+            case 'B': //Blue, ещё хитрее, идёт на опрежение игрока, но от Blue
+                {
+                    //Берёт точку на 2 клетки впереди игрока
+                    int projX = target->x + 2 * target->dx;
+                    int projY = target->y + 2 * target->dy;
+                    //Считает вектор от B (Blue) до этой точки и удваивает его
+                    int vx = projX - ghosts[0].x;
+                    int vy = projY - ghosts[0].y;
+                    tx = ghosts[0].x + 2 * vx;
+                    ty = ghosts[0].y + 2 * vy;
+                }
+                break;
+            case 'Y': //Yellow, ссыкло, если игрок далеко(>8 клеток) - преследует, иначе убегает
+                {
+                    int dist = std::abs(gx - target->x) + std::abs(gy - target->y);
+                    if (dist > 8) {
+                        tx = target->x;
+                        ty = target->y;
+                    } else {
+                        tx = 1;
+                        ty = Level.size() - 2; //угол карты
+                    }
+                }
+                break;
+        }
         //Направления
         std::vector<Dir> directions = {
             {0, -1},
@@ -181,9 +219,10 @@ void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, 
         g.y += bestDy;
 
         if ((g.x == p1.x && g.y == p1.y) || (players == 2 && g.x == p2.x && g.y == p2.y)) {
-            GoToxy(0, Level.size() + 3);
-            std::cout << "Game Over!";
-            Sleep(2000);
+            system("cls");
+            GoToxy(50, Level.size() / 2);
+            std::cout << "GAME OVER!!!";//Здесь сделаем либо перезаход в меню, либо ещё что-нибудь
+            Sleep(5000);
             exit(0);
         }
 
