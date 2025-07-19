@@ -11,7 +11,7 @@ std::vector<std::string> Level;
 bool ChoiceUser()
 {
     bool choice = 0; // Выбор пользователя 0 - PLAY, 1 - EXIT
-    while(!(GetAsyncKeyState(VK_RETURN) & 0x8000 || (GetAsyncKeyState(VK_ESCAPE) & 0x8000))) // Выход из цикла на ESC, ENTER
+    while(!(GetAsyncKeyState(VK_RETURN) & 0x8000)) // Выход из цикла на ESC, ENTER
     {
         GoToxy(0,choice);
         std::cout << ">";
@@ -44,7 +44,6 @@ int Menu()
 
 void LoadMap()
 {
-    CurrentMap +=1;
     Level = Maps[CurrentMap]; //Подгружает из Maps.h нужный уровень
     for (int i = 0; i < std::size(Level); i++) //Печатает уровень в консоль
         std::cout << Level[i] << "\n";

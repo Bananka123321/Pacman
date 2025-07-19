@@ -6,7 +6,7 @@
 
 unsigned int score = 0;
 
-void DrawScore(int score_row, unsigned int score1, unsigned int score2, int players)
+bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int players)
 {
     GoToxy(0, score_row);
     if (players == 1)
@@ -19,12 +19,10 @@ void DrawScore(int score_row, unsigned int score1, unsigned int score2, int play
         system("cls");
         GoToxy(50, Level.size() / 2);
         std::cout << "CONGRATULATIONS!";//Здесь сделаем запуск следующего уровня по таймеру или нажатию enter
-        while (true)
-        {
-        }
-
+        Sleep(5000);
+        return true;
     }
-    
+    return false;
 }
 
 void CollectPoint(Player& p, std::vector<std::string>& level)
@@ -46,10 +44,13 @@ bool IsWall(int x, int y)
     return Level[y][x] == '#';
 }
 
-void Movement(int players, int &x1, int &y1, int &x2, int &y2)
+bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 {
     Player p1 = {x1, y1, 1, 0, '@'};
     Player p2 = {players == 2 ? x2 : 0, players == 2 ? y2 : 0, -1, 0, 'X'};
+
+    bool p1Alive = true;
+    bool p2Alive = (players == 2);
 
     std::vector<Ghost> ghosts;
     ghosts.push_back({23, 13, 0, 0, 'R', 0});  //Red
@@ -63,12 +64,12 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
     while (!(GetAsyncKeyState(VK_ESCAPE) & 0x8000))
     {
 
-        if (!IsWall(p1.x, p1.y))
+        if (p1Alive && !IsWall(p1.x, p1.y))
         {
             GoToxy(p1.x, p1.y); 
             std::cout << ' ';
         }
-        if (players == 2 && !IsWall(p2.x, p2.y))
+        if (players == 2 && p2Alive && !IsWall(p2.x, p2.y))
         {
             GoToxy(p2.x, p2.y); 
             std::cout << ' ';
@@ -112,17 +113,21 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
             if (players == 2) { p2.x = tx2; p2.y = ty2; }
         }
 
-        CollectPoint(p1, Level);
+        if (p1Alive) {
+            CollectPoint(p1, Level);
+            GoToxy(p1.x, p1.y); std::cout << p1.icon;
+        }
 
-        GoToxy(p1.x, p1.y); std::cout << p1.icon;
-        if (players == 2) {
+        if (players == 2 && p2Alive) {
             CollectPoint(p2, Level);
             GoToxy(p2.x, p2.y); std::cout << p2.icon;
         }
 
-        DrawScore(score_row, p1.score, p2.score, players);
+        if (DrawScore(score_row, p1.score, p2.score, players))
+            return true;
 
-        MoveGhosts(ghosts, p1, p2, players);
+        if (MoveGhosts(ghosts, p1, p2, players, p1Alive, p2Alive))
+            return false;
 
         Sleep(150);
 
@@ -132,9 +137,10 @@ void Movement(int players, int &x1, int &y1, int &x2, int &y2)
             {}
         }
     }
+    return false;
 }
 
-void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players)
+bool MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players, bool& p1Alive, bool& p2Alive)
 {
     for (Ghost& g : ghosts)
     {
@@ -218,15 +224,30 @@ void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, 
         g.x += bestDx;
         g.y += bestDy;
 
-        if ((g.x == p1.x && g.y == p1.y) || (players == 2 && g.x == p2.x && g.y == p2.y)) {
+        if (g.x == p1.x && g.y == p1.y && p1Alive) { //Поймали первого игрока
+            p1Alive = false;
+            GoToxy(50, Level.size() / 2);
+            std::cout << "PLAYER 1 CAUGHT!";
+            Sleep(1000);
+        }
+
+        if (players == 2 && g.x == p2.x && p2Alive && g.y == p2.y) { //Поймали второго игрока
+            p2Alive = false;
+            GoToxy(50, Level.size() / 2 + 1);
+            std::cout << "PLAYER 2 CAUGHT!";
+            Sleep(1000);
+        }
+
+        if (!p1Alive && (!p2Alive || players == 1)) { //Всех игроков поймали
             system("cls");
             GoToxy(50, Level.size() / 2);
-            std::cout << "GAME OVER!!!";//Здесь сделаем либо перезаход в меню, либо ещё что-нибудь
+            std::cout << "GAME OVER!!!";
             Sleep(5000);
-            exit(0);
+            return true;
         }
 
         GoToxy(g.x, g.y);
         std::cout << g.icon;
     }
+    return false;//Игрок не пойман - продолжаем игру
 }

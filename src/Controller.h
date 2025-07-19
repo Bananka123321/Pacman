@@ -6,9 +6,9 @@ extern unsigned int score;
 
 void GoToxy(int x, int y);
 bool IsWall(int x, int y);//Проверяет есть ли стена
-void Movement(int players, int &x1, int &y1, int &x2, int &y2);
+bool Movement(int players, int &x1, int &y1, int &x2, int &y2);
 
-void DrawScore(int score_column, unsigned int score1, unsigned int score2, int players);//Вывод счёта игрока/игроков
+bool DrawScore(int score_column, unsigned int score1, unsigned int score2, int players);//Вывод счёта игрока/игроков
 
 struct Player {
     int x, y;
@@ -26,6 +26,6 @@ struct Ghost {
 
 struct Dir { int dx, dy; };
 
-void MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players);
+bool MoveGhosts(std::vector<Ghost>& ghosts, const Player& p1, const Player& p2, int players, bool& p1Alive, bool& p2Alive);
 
 void CollectPoint(Player& p, const std::vector<std::string>& level);
