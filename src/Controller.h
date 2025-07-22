@@ -3,6 +3,7 @@
 #include <string>
 
 extern unsigned int score;
+extern unsigned int framecount;
 
 void GoToxy(int x, int y);
 bool IsWall(int x, int y);//Проверяет есть ли стена
