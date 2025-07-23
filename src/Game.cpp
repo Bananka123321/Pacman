@@ -5,8 +5,10 @@
 #include <windows.h>
 #include <cstdlib>
 
-int CurrentMap = -1;
-std::vector<std::string> Level;
+int CurrentMapIndex = -1;
+MapData CurrentMap;
+int totalDots = 0;
+
 
 bool ChoiceUser()
 {
@@ -48,31 +50,37 @@ int Menu()
     return TwoPlayers ? 2 : 1;
 }
 
-void LoadMap()
-{
-    if (CurrentMap >= 0 && CurrentMap < Maps.size()) {
-        Level = Maps[CurrentMap];
+void LoadMap() {
+    if (CurrentMapIndex >= 0 && CurrentMapIndex < AllMaps.size()) {
+        CurrentMap = AllMaps[CurrentMapIndex];
 
-        offsetX = (GetConsoleWidth() - Level[0].size()) / 2;
-        offsetY = (GetConsoleHeight() - Level.size()) / 2;
+        offsetX = (GetConsoleWidth() - CurrentMap.layout[0].size()) / 2;
+        offsetY = (GetConsoleHeight() - CurrentMap.layout.size()) / 2;
 
-        for (int y = 0; y < Level.size(); y++) {
-            for (int x = 0; x < Level[y].size(); x++) {
+        for (int y = 0; y < CurrentMap.layout.size(); y++) {
+            for (int x = 0; x < CurrentMap.layout[y].size(); x++) {
                 GoToxy(x, y);
-                std::cout << Level[y][x];
+                std::cout << CurrentMap.layout[y][x];
             }
         }
     }
+    DotsCounter();
 }
 
+void DotsCounter(){
+    totalDots = 0;
+    for (std::string row : CurrentMap.layout)
+                for (char c : row)
+                    if (c == '.') totalDots++;
+}
 
 void DrawFruitDescriptions()//Пишет описание фруктов
 {
     int startX = 60;//Правее карты
     int y = 1;
 
-    offsetX = (GetConsoleWidth() - Level[0].size()) / 2;
-    offsetY = (GetConsoleHeight() - Level.size()) / 2;
+    offsetX = (GetConsoleWidth() - CurrentMap.layout[0].size()) / 2;
+    offsetY = (GetConsoleHeight() - CurrentMap.layout.size()) / 2;
     
     std::vector<std::pair<std::string, std::string>> fruits = {
         {"Cherry", "Gives +50 points"},

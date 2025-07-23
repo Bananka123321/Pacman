@@ -17,6 +17,7 @@ struct Player {
     char icon;
     unsigned int score = 0;//Счёт каждого игрока
     unsigned int points = 0; // съеденные точки
+    int lives = 3;//Количество жизней игроков
 };
 
 struct Ghost {

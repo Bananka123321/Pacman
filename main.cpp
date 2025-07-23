@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "src/Game.h"
 #include "src/Controller.h"
+#include "src/Maps.h"
 
 
 int main()
@@ -16,18 +17,19 @@ int main()
         offsetX = GetConsoleWidth() / 2;
         offsetY = GetConsoleHeight() / 2;
         int players = Menu();//Выбор количества игроков
-        CurrentMap = -1;//Сброс на первый уровень
+        CurrentMapIndex = -1;//Сброс на первый уровень
 
         while (true) //Цикл уровней
         {
-            CurrentMap++;
-            if (CurrentMap >= 10) {
+            CurrentMapIndex++;
+            if (CurrentMapIndex >= AllMaps.size()) {
                 break; //Возвращаемся в меню
             }
             
             system("cls");
             
             LoadMap();
+
             DrawFruitDescriptions();
             
             int x1 = 4, y1 = 1;
@@ -39,7 +41,7 @@ int main()
 
             else {
                 system("cls");
-                GoToxy(50, Level.size() / 2);
+                GoToxy(50, CurrentMap.layout.size() / 2);
                 std::cout << "LEVEL COMPLETE!";
                 Sleep(2000);
             }

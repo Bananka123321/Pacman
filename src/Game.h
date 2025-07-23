@@ -7,5 +7,5 @@ int Menu();
 void LoadMap();//Загрузка уровня
 void DrawFruitDescriptions();
 
-extern int CurrentMap;//Счётчик пройденных уровней
-extern std::vector<std::string> Level; //Текущий уровень
+void DotsCounter();
+extern int totalDots;//Количество точек на карте

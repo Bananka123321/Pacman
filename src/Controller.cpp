@@ -19,19 +19,13 @@ int offsetX = 0;
 int offsetY = 0;
 
 const int GAME_TICK = 10;       // минимальная задержка игры
-int PLAYER_TICK_BASE = 10;      // задержка игрока
-int GHOST_TICK_BASE = 30;       // базовая задержка призраков
-int RED_ACCEL_STEP = 180;       // каждые 20 точек уменьшаем задержку
-int RED_ACCEL = 10;             // насколько уменьшается задержка
-int GHOST_TICK_MIN = 10;        // минимальная задержка призраков (макс. скорость)
-int TIME_HUNT = 80000;            // время охоты игрока
-int GHOST_TICK_HUNT = 40;       // задержка призрака при охоте игрока
 const int RECALL = 1;           // задержка призрака при его смерти
 
+//Координаты базы
+const int baseX = 15;
+const int baseY = 10;
 
-/// Все что в блоке выше без const надо добавить в параметры карты
-
-int lastTickSpeed = GHOST_TICK_BASE; // задержка до возращения на базу
+int lastTickSpeed = CurrentMap.GHOST_TICK_BASE; // задержка до возращения на базу
 
 int ScaredDir(Dir reverse, std::vector<bool> turns)
 {
@@ -46,7 +40,6 @@ int ScaredDir(Dir reverse, std::vector<bool> turns)
         }
     }
 }
-
 
 long GetConsoleWidth() // Получаем ширину консоли
 {
@@ -70,10 +63,10 @@ bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int play
     else
         std::cout << "P1: " << score1 << "   P2: " << score2;
 
-    if (points == 436) // вроде 436 точек на карте
+    if (points == totalDots)
     {
         system("cls");
-        GoToxy(50, Level.size() / 2);
+        GoToxy(50, CurrentMap.layout.size() / 2);
         std::cout << "CONGRATULATIONS!";
         Sleep(5000);
         return true;
@@ -110,7 +103,7 @@ void GoToxy(int x, int y)
 
 bool IsWall(int x, int y)
 {
-    return Level[y][x] == '#';
+    return CurrentMap.layout[y][x] == '#';
 }
 
 int CountTurn(std::vector<bool> availableTurns)
@@ -131,7 +124,7 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
     if (!IsWall(g.x, g.y))
     {
         GoToxy(g.x, g.y);
-        std::cout << Level[g.y][g.x];
+        std::cout << CurrentMap.layout[g.y][g.x];
     }
 
     const Player *target = &p1;
@@ -182,7 +175,7 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
         else
         {
             tx = 1;
-            ty = Level.size() - 2; //угол карты
+            ty = CurrentMap.layout.size() - 2; //угол карты
         }
         break;
     }
@@ -230,16 +223,34 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
     {
         bestDir = reverse;
     }
-    if ((startHunt <= frameCount && frameCount <= (startHunt + GHOST_TICK_BASE)))
+    if ((startHunt <= frameCount && frameCount <= (startHunt + CurrentMap.GHOST_TICK_BASE)))
     {
         g.dx = -g.dx;
         g.dy = -g.dy;
     }
     else if (g.recalling)
     {
-        p1.icon = '2'; /// надо решить проблему с возращением
-        g.dx = bestDir.dx;
-        g.dy = bestDir.dy;
+    //Двигаемся в сторону базы
+    int dxToBase = baseX - g.x;
+    int dyToBase = baseY - g.y;
+
+    //Выбираем шаг в сторону базы (манхэттен)
+    if (abs(dxToBase) > abs(dyToBase))
+    {
+        g.dx = (dxToBase > 0) ? 1 : -1;
+        g.dy = 0;
+    }
+    else if (dyToBase != 0)
+    {
+        g.dx = 0;
+        g.dy = (dyToBase > 0) ? 1 : -1;
+    }
+    else
+    {
+        //Уже на базе
+        g.dx = 0;
+        g.dy = 0;
+    }
     }
     else if (scared && isFork && !g.recalling)
     {
@@ -252,24 +263,38 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
         g.dx = bestDir.dx;
         g.dy = bestDir.dy;
     }
-    g.x += g.dx;
-    g.y += g.dy;    
 
-    if (g.x == 15 && g.y == 10)
+    g.x += g.dx;
+    g.y += g.dy;
+
+    // Проверяем достижение базы
+    if (g.x == baseX && g.y == baseY)
     {
-        g.recalling = false;
-        g.icon = iconsGhost[idx];
+        if (g.recalling)
+        {
+            g.recalling = false;
+            g.icon = iconsGhost[idx];       // Восстановление иконки
+            g.tickPerMove = CurrentMap.GHOST_TICK_BASE; // Восстановление скорости (или нужной)
+        }
     }
 
+    int px_old = p1.x - p1.dx;
+    int py_old = p1.y - p1.dy;
+    int gx_old = g.x - g.dx;
+    int gy_old = g.y - g.dy;
 
-    if (((g.x == p1.x && g.y == p1.y) || (g.x == (p1.x + p1.dx) && g.y == (p1.y + p1.dy))) && p1Alive) //Поймали первого игрока
+    if (((g.x == p1.x && g.y == p1.y) || (g.x == px_old && g.y == py_old && gx_old == p1.x && gy_old == p1.y)) && p1Alive) //Поймали первого игрока
     {
         if (!scared)
         {
-            p1Alive = false;
-            GoToxy(50, Level.size() / 2);
-            std::cout << "PLAYER 1 CAUGHT!";
-            Sleep(1000);
+            --p1.lives;
+            if (p1.lives == 0)
+            {
+                p1Alive = false;
+                GoToxy(50, CurrentMap.layout.size() / 2);
+                std::cout << "PLAYER 1 CAUGHT!";
+                Sleep(1000);
+            }
         }
         else
         {
@@ -277,17 +302,25 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
             p1.score += 40 * (catched + 1);
             g.recalling = true;
             g.icon = '0';
-            g.tickPerMove = GHOST_TICK_MIN;
+            g.tickPerMove = CurrentMap.GHOST_TICK_MIN;
         }
     }
-    if (players == 2 && ((g.x == p2.x && g.y == p2.y) || (g.x == (p2.x + p2.dx) && g.y == (p2.y + p2.dy))) && p2Alive) //Поймали второго игрока
+
+    px_old = p2.x - p2.dx;
+    py_old = p2.y - p2.dy;
+
+    if (players == 2 && ((g.x == p2.x && g.y == p2.y) || (g.x == px_old && g.y == py_old && gx_old == p2.x && gy_old == p2.y)) && p2Alive) //Поймали второго игрока
     {
         if (!scared)
         {
-            p2Alive = false;
-            GoToxy(50, Level.size() / 2 + 1);
-            std::cout << "PLAYER 2 CAUGHT!";
-            Sleep(1000);
+            if (p2.lives == 0)
+            {
+                --p2.lives;
+                p2Alive = false;
+                GoToxy(50, CurrentMap.layout.size() / 2 + 1);
+                std::cout << "PLAYER 2 CAUGHT!";
+                Sleep(1000);
+            }
         }
         else
         {
@@ -295,19 +328,29 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
             p2.score += 40 * (catched + 1);
             g.recalling = true;
             g.icon = '0';
-            g.tickPerMove = GHOST_TICK_MIN;
+            g.tickPerMove = CurrentMap.GHOST_TICK_MIN;
         }
     }
     if (!p1Alive && (!p2Alive || players == 1)) //Всех игроков поймали
     { 
         system("cls");
-        GoToxy(50, Level.size() / 2);
+        GoToxy(50, CurrentMap.layout.size() / 2);
         std::cout << "GAME OVER!!!";
         Sleep(5000);
     }
 
+    //Перед выводом призрака восстанавливаем символ карты
+    char mapChar = CurrentMap.layout[g.y][g.x];
     GoToxy(g.x, g.y);
-    std::cout << g.icon;
+    std::cout << mapChar;
+
+    //Если позиция не стена — рисуем призрака
+    if (!IsWall(g.x, g.y))
+    {
+        GoToxy(g.x, g.y);
+        std::cout << g.icon;
+    }
+
 }
 
 bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
@@ -316,18 +359,18 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
     Player p2 = {players == 2 ? x2 : 0,
                  players == 2 ? y2 : 0,
                  -1, 0, 'X'};
-    bool p1Alive = true, p2Alive = (players == 2);
+    bool p1Alive = (p1.lives > 0), p2Alive = (players == 2 && p2.lives > 0);
 
 
-    std::vector<Ghost> ghosts = {{15, 11, 0, 0, 'R', false, GHOST_TICK_BASE, 0}};  //Red
+    std::vector<Ghost> ghosts = {{15, 11, 0, 0, 'R', false, CurrentMap.GHOST_TICK_BASE, 0}};  //Red
 
-    int score_row = Level.size(); //строка, в которой пишем очки
+    int score_row = CurrentMap.layout.size(); //строка, в которой пишем очки
 
     while (!(GetAsyncKeyState(VK_ESCAPE) & 0x8000))
     {
         ++frameCount;
         
-        if((frameCount - startHunt) == TIME_HUNT)
+        if((frameCount - startHunt) == CurrentMap.TIME_HUNT)
         {
             scared = false;
             catched = 0;
@@ -345,15 +388,15 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
                     ghosts[i].icon = 'S';
             }
         }
-        if((frameCount == 200 || points == 12) && ghosts.size() < 2)
-            ghosts.push_back({17, 11, 0, 0, 'P', false, GHOST_TICK_BASE, 1});   //Pink    
-        if((frameCount == 500 || points == 29) && ghosts.size() < 3)
-            ghosts.push_back({19, 11, 0, 0, 'B', false, GHOST_TICK_BASE, 2});   //Blue
-        if((frameCount == 1000 || points == 55) && ghosts.size() < 4)
-            ghosts.push_back({21, 11, 0, 0, 'Y', false, GHOST_TICK_BASE, 3});   //Yellow
+        if((frameCount == 1000 || points == 30) && ghosts.size() < 2)
+            ghosts.push_back({17, 11, 0, 0, 'P', false, CurrentMap.GHOST_TICK_BASE, 1});   //Pink    
+        if((frameCount == 1500 || points == 100) && ghosts.size() < 3)
+            ghosts.push_back({19, 11, 0, 0, 'B', false, CurrentMap.GHOST_TICK_BASE, 2});   //Blue
+        if((frameCount == 2000 || points == 200) && ghosts.size() < 4)
+            ghosts.push_back({21, 11, 0, 0, 'Y', false, CurrentMap.GHOST_TICK_BASE, 3});   //Yellow
         
 
-        if (frameCount % PLAYER_TICK_BASE == 0)
+        if (frameCount % CurrentMap.PLAYER_TICK_BASE == 0)
         {
             if (p1Alive && !IsWall(p1.x, p1.y))
             {
@@ -410,16 +453,16 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 
             if (p1Alive)
             {
-                CollectBuster(p1,Level);
-                CollectPoint(p1, Level);
+                CollectBuster(p1, CurrentMap.layout);
+                CollectPoint(p1, CurrentMap.layout);
                 GoToxy(p1.x, p1.y);
                 std::cout << p1.icon;
             }
 
             if (players == 2 && p2Alive)
             {
-                CollectBuster(p1,Level);
-                CollectPoint(p2, Level);
+                CollectBuster(p2,CurrentMap.layout);//Исправил баг с тем, что 2-ой игрок не использует бустер
+                CollectPoint(p2, CurrentMap.layout);
                 GoToxy(p2.x, p2.y);
                 std::cout << p2.icon;
             }
@@ -430,13 +473,13 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 
         for (size_t i = 0; i < ghosts.size(); ++i)
         {
-            if (frameCount % ((ghosts[i].tickPerMove * (int)(!scared) + GHOST_TICK_HUNT * (int)(scared)) * !ghosts[i].recalling + ghosts[i].tickPerMove * ghosts[i].recalling) == 0)
+            if (frameCount % ((ghosts[i].tickPerMove * (int)(!scared) + CurrentMap.GHOST_TICK_HUNT * (int)(scared)) * !ghosts[i].recalling + ghosts[i].tickPerMove * ghosts[i].recalling) == 0)
             {
                 if (ghosts[i].icon == 'R')
                 {
                     unsigned int total = p1.score + (players == 2 ? p2.score : 0);
-                    int accel = (total / RED_ACCEL_STEP) * RED_ACCEL;
-                    ghosts[i].tickPerMove = std::max(GHOST_TICK_BASE - accel, GHOST_TICK_MIN);
+                    int accel = (total / CurrentMap.RED_ACCEL_STEP) * CurrentMap.RED_ACCEL;
+                    ghosts[i].tickPerMove = std::max(CurrentMap.GHOST_TICK_BASE - accel, CurrentMap.GHOST_TICK_MIN);
                     lastTickSpeed = ghosts[i].tickPerMove;
                 }
                 MoveOneGhost(ghosts, i, p1, p2, players, p1Alive, p2Alive);
@@ -455,14 +498,4 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 }
 
 
-
-/// TODO нужно сделать корректную ловлю игрока есть моменты когда игрок и призрак проскакивают сквозь себя  ✓
-/// добавить функционал бустера
-/// \> испуг призраков                      ✓
-/// |> разворот на 180* в начале охоты      ✓
-/// |> возможность съесть призрака          ✓
-/// |> очки за призраков                    ✓ 
-/// |> возвращение призраков                X
-
-
-/// Реализовать ворота или сделать выпуск призраков более предсказуесмым X
+/// Реализовать ворота или сделать выпуск призраков более предсказуесмым X - Так тоже шикос
