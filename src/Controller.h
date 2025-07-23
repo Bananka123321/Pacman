@@ -3,7 +3,7 @@
 #include <string>
 
 extern unsigned int score;
-extern unsigned int framecount;
+extern unsigned int frameCount;
 
 void GoToxy(int x, int y);
 bool IsWall(int x, int y);//Проверяет есть ли стена
@@ -16,12 +16,15 @@ struct Player {
     int dx, dy;
     char icon;
     unsigned int score = 0;//Счёт каждого игрока
+    unsigned int points = 0; // съеденные точки
 };
 
 struct Ghost {
     int x, y;
     int dx, dy;
     char icon;
+    bool recalling;
+    int tickPerMove;
     int type;// 0 - Red, 1 - Pink, 2 - Blue, 3 - Yellow
 };
 
