@@ -83,15 +83,15 @@ void DrawFruitDescriptions()//Пишет описание фруктов
     offsetY = (GetConsoleHeight() - CurrentMap.layout.size()) / 2;
     
     std::vector<std::pair<std::string, std::string>> fruits = {
-        {"Cherry", "Gives +50 points"},
-        {"Strawberry", "Gives +100 points"},
-        {"Grapes", "Bonus +200 points"},
-        {"Watermelon", "Extra life!"}
+        {"C", "Gives +50 points"},
+        {"L", "Gives +100 points"},
+        {"G", "Bonus +200 points"},
+        {"W", "Extra life!"}
     };
 
     for (auto& [fruit, desc] : fruits)
     {
-        GoToxy(startX, y++);
+        GoToxy(startX, y);
         std::cout << fruit;
         GoToxy(startX + 2, y);
         std::cout << desc;

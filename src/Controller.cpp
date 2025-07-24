@@ -59,21 +59,17 @@ bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int live
 {
     GoToxy(0, score_row);
     if (players == 1)
-    {
-        std::cout << "Score: " << score1 << "    " << "Frame: " << frameCount << "    ";
-        GoToxy(0, score_row + 1);
-        std::cout << "Lives: " << lives1 << "    ";
-    }
+        std::cout << "Score: " << score1 << "    " << "Lives: " << lives1 + 1 << "    ";
     else
     {
         std::cout << "P1   : " << score1 << "   P2   : " << score2;
         GoToxy(0, score_row + 1);
-        std::cout << "Lives: " << lives1 << "   Lives: " << lives2;
+        std::cout << "Lives: " << lives1 + 1 << "   Lives: " << lives2 + 1;
     }
     if (points == totalDots)
     {
         system("cls");
-        GoToxy(50, CurrentMap.layout.size() / 2);
+        GoToxy(0, 0);
         std::cout << "CONGRATULATIONS!";
         Sleep(5000);
         return true;
@@ -89,6 +85,14 @@ void CollectPoint(Player &p, std::vector<std::string> &level)
         ++p.score;
         points++;
     }
+    else if (level[p.y][p.x] == 'C')
+        p.score += 50;
+    else if (level[p.y][p.x] == 'L')
+        p.score += 100;
+    else if (level[p.y][p.x] == 'G')
+        p.score += 200;
+    else if (level[p.y][p.x] == 'W' && p.lives < 2)
+        ++p.lives;
 }
 
 void CollectBuster(Player &p, std::vector<std::string> &level, std::vector<Ghost> ghosts)
@@ -300,15 +304,14 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
         GoToxy(g.x, g.y);
         std::cout << g.icon;
     }
-
 }
 
 bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 {
-    Player p1 = {x1, y1, 1, 0, '@'};
+    Player p1 = {x1, y1, 1, 0, '@', 0};
     Player p2 = {players == 2 ? x2 : 0,
                  players == 2 ? y2 : 0,
-                 -1, 0, 'X'};
+                 -1, 0, 'X', 0};
     bool p1Alive = (p1.lives > 0), p2Alive = (players == 2 && p2.lives > 0);
 
 
