@@ -5,14 +5,46 @@
 #include <cstdlib>
 #include "src/Game.h"
 #include "src/Controller.h"
+#include "src/Maps.h"
 
 
 int main()
 {
-    system("cls");
-    int players = Menu();
-    int x1 = 4, y1 = 1;
-    int x2 = 4, y2 = 1;
+    system("mode con: cols=150 lines=40");//Pазмер консоли
+    while (true)
+    {
+        system("cls");
+        offsetX = GetConsoleWidth() / 2;
+        offsetY = GetConsoleHeight() / 2;
+        int players = Menu();//Выбор количества игроков
+        CurrentMapIndex = -1;//Сброс на первый уровень
 
-    Movement(players, x1, y1, x2, y2);
+        while (true) //Цикл уровней
+        {
+            CurrentMapIndex++;
+            if (CurrentMapIndex >= AllMaps.size()) {
+                break; //Возвращаемся в меню
+            }
+            
+            system("cls");
+            
+            LoadMap();
+
+            DrawFruitDescriptions();
+            
+            int x1 = 4, y1 = 1;
+            int x2 = 4, y2 = 1;
+
+            if (!Movement(players, x1, y1, x2, y2)) {
+                break; //Возвращаемся в главное меню
+            }
+
+            else {
+                system("cls");
+                GoToxy(50, CurrentMap.layout.size() / 2);
+                std::cout << "LEVEL COMPLETE!";
+                Sleep(2000);
+            }
+        }
+    }
 }
