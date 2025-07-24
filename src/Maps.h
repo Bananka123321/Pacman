@@ -13,6 +13,12 @@ struct MapData { //Структура карт, содержащая перем�
     int GHOST_TICK_MIN;        // минимальная задержка призраков (макс. скорость)
     int TIME_HUNT;             // время охоты игрока
     int GHOST_TICK_HUNT;       // задержка призрака при охоте игрока
+    std::vector<int> HOME_PLAYER_1;
+    std::vector<int> HOME_PLAYER_2;
+    std::vector<int> HOME_RED;
+    std::vector<int> HOME_PINK;
+    std::vector<int> HOME_BLUE;
+    std::vector<int> HOME_YELLOW;
 };
 
 extern std::vector<MapData> AllMaps;

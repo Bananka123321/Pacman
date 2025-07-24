@@ -9,7 +9,7 @@ void GoToxy(int x, int y);
 bool IsWall(int x, int y);//Проверяет есть ли стена
 bool Movement(int players, int &x1, int &y1, int &x2, int &y2);
 
-bool DrawScore(int score_column, unsigned int score1, unsigned int score2, int players);//Вывод счёта игрока/игроков
+bool DrawScore(int score_column, unsigned int score1, unsigned int score2, int lives1, int lives2, int players);//Вывод счёта игрока/игроков
 
 struct Player {
     int x, y;
@@ -25,6 +25,7 @@ struct Ghost {
     int dx, dy;
     char icon;
     bool recalling;
+    bool beEaten;
     int tickPerMove;
     int type;// 0 - Red, 1 - Pink, 2 - Blue, 3 - Yellow
 };
@@ -41,4 +42,4 @@ long GetConsoleHeight();
 extern int offsetX;
 extern int offsetY;
 
-void Respawn(Player& Player);//Респавн игрока в начале карты, если есть жизни
+void Respawn(Player& Player, int players);//Респавн игрока в начале карты, если есть жизни

@@ -55,14 +55,21 @@ long GetConsoleHeight() // Получаем высоту консоли
     return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
 
-bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int players)
+bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int lives1, int lives2, int players)
 {
     GoToxy(0, score_row);
     if (players == 1)
+    {
         std::cout << "Score: " << score1 << "    " << "Frame: " << frameCount << "    ";
+        GoToxy(0, score_row + 1);
+        std::cout << "Lives: " << lives1 << "    ";
+    }
     else
-        std::cout << "P1: " << score1 << "   P2: " << score2;
-
+    {
+        std::cout << "P1   : " << score1 << "   P2   : " << score2;
+        GoToxy(0, score_row + 1);
+        std::cout << "Lives: " << lives1 << "   Lives: " << lives2;
+    }
     if (points == totalDots)
     {
         system("cls");
@@ -84,7 +91,7 @@ void CollectPoint(Player &p, std::vector<std::string> &level)
     }
 }
 
-void CollectBuster(Player &p, std::vector<std::string> &level)
+void CollectBuster(Player &p, std::vector<std::string> &level, std::vector<Ghost> ghosts)
 {
     if (level[p.y][p.x] == '%')
     {
@@ -92,6 +99,10 @@ void CollectBuster(Player &p, std::vector<std::string> &level)
         p.score += 5;
         scared = true;
         startHunt = frameCount; 
+    }
+    for (int i; i < ghosts.size(); i++)
+    {
+        ghosts[i].beEaten = false;
     }
 }
 
@@ -278,69 +289,6 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
         }
     }
 
-    int px_old = p1.x - p1.dx;
-    int py_old = p1.y - p1.dy;
-    int gx_old = g.x - g.dx;
-    int gy_old = g.y - g.dy;
-
-    if (((g.x == p1.x && g.y == p1.y) || (g.x == px_old && g.y == py_old && gx_old == p1.x && gy_old == p1.y)) && p1Alive) //Поймали первого игрока
-    {
-        if (!scared)
-        {
-            if (p1.lives == 0)
-            {
-                p1Alive = false;
-                GoToxy(50, CurrentMap.layout.size() / 2);
-                std::cout << "PLAYER 1 CAUGHT!";
-                Sleep(1000);
-            }
-            else
-            {
-                --p1.lives;
-                GoToxy(-offsetX, -offsetY);
-                std::cout << p1.lives;
-                Respawn(p1);
-            }
-        }
-        else
-        {
-            catched++;
-            p1.score += 40 * (catched + 1);
-            g.recalling = true;
-            g.icon = '0';
-            g.tickPerMove = CurrentMap.GHOST_TICK_MIN;
-        }
-    }
-
-    px_old = p2.x - p2.dx;
-    py_old = p2.y - p2.dy;
-
-    if (players == 2 && ((g.x == p2.x && g.y == p2.y) || (g.x == px_old && g.y == py_old && gx_old == p2.x && gy_old == p2.y)) && p2Alive) //Поймали второго игрока
-    {
-        if (!scared)
-        {
-            if (p2.lives == 0)
-            {
-                p2Alive = false;
-                GoToxy(50, CurrentMap.layout.size() / 2 + 1);
-                std::cout << "PLAYER 2 CAUGHT!";
-                Sleep(1000);
-            }
-            {
-                --p2.lives;
-                Respawn(p2);
-            }
-        }
-        else
-        {
-            catched++;
-            p2.score += 40 * (catched + 1);
-            g.recalling = true;
-            g.icon = '0';
-            g.tickPerMove = CurrentMap.GHOST_TICK_MIN;
-        }
-    }
-
     //Перед выводом призрака восстанавливаем символ карты
     char mapChar = CurrentMap.layout[g.y][g.x];
     GoToxy(g.x, g.y);
@@ -364,7 +312,7 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
     bool p1Alive = (p1.lives > 0), p2Alive = (players == 2 && p2.lives > 0);
 
 
-    std::vector<Ghost> ghosts = {{15, 11, 0, 0, 'R', false, CurrentMap.GHOST_TICK_BASE, 0}};  //Red
+    std::vector<Ghost> ghosts = {{CurrentMap.HOME_RED[0], CurrentMap.HOME_RED[1], 0, 0, 'R', false, false, CurrentMap.GHOST_TICK_BASE, 0}};  //Red
 
     int score_row = CurrentMap.layout.size(); //строка, в которой пишем очки
 
@@ -379,6 +327,7 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
             for(int i = 0; i < ghosts.size(); i++)
             {
                 ghosts[i].icon = iconsGhost[i];
+                ghosts[i].beEaten = false;
             }
             ghosts[0].tickPerMove = lastTickSpeed;
         }
@@ -386,16 +335,16 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
         {
             for (int i = 0; i < ghosts.size(); i++)
             {
-                if (!ghosts[i].recalling)
+                if (!ghosts[i].beEaten)
                     ghosts[i].icon = 'S';
             }
         }
         if((frameCount == 1000 || points == 30) && ghosts.size() < 2)
-            ghosts.push_back({17, 11, 0, 0, 'P', false, CurrentMap.GHOST_TICK_BASE, 1});   //Pink    
+            ghosts.push_back({CurrentMap.HOME_PINK[0], CurrentMap.HOME_PINK[1], 0, 0, 'P', false, false, CurrentMap.GHOST_TICK_BASE, 1});   //Pink    
         if((frameCount == 1500 || points == 100) && ghosts.size() < 3)
-            ghosts.push_back({19, 11, 0, 0, 'B', false, CurrentMap.GHOST_TICK_BASE, 2});   //Blue
+            ghosts.push_back({CurrentMap.HOME_BLUE[0], CurrentMap.HOME_BLUE[1], 0, 0, 'B', false, false, CurrentMap.GHOST_TICK_BASE, 2});   //Blue
         if((frameCount == 2000 || points == 200) && ghosts.size() < 4)
-            ghosts.push_back({21, 11, 0, 0, 'Y', false, CurrentMap.GHOST_TICK_BASE, 3});   //Yellow
+            ghosts.push_back({CurrentMap.HOME_YELLOW[0], CurrentMap.HOME_YELLOW[1], 0, 0, 'Y', false, false, CurrentMap.GHOST_TICK_BASE, 3});   //Yellow
         
 
         if (frameCount % CurrentMap.PLAYER_TICK_BASE == 0)
@@ -455,7 +404,7 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 
             if (p1Alive)
             {
-                CollectBuster(p1, CurrentMap.layout);
+                CollectBuster(p1, CurrentMap.layout, ghosts);
                 CollectPoint(p1, CurrentMap.layout);
                 GoToxy(p1.x, p1.y);
                 std::cout << p1.icon;
@@ -463,7 +412,7 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 
             if (players == 2 && p2Alive)
             {
-                CollectBuster(p2,CurrentMap.layout);//Исправил баг с тем, что 2-ой игрок не использует бустер
+                CollectBuster(p2,CurrentMap.layout, ghosts);//Исправил баг с тем, что 2-ой игрок не использует бустер || на самом деле был лютый баг. спасибо, что помог
                 CollectPoint(p2, CurrentMap.layout);
                 GoToxy(p2.x, p2.y);
                 std::cout << p2.icon;
@@ -479,7 +428,7 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
                 return false;
             }
         }
-        if (DrawScore(score_row, p1.score, p2.score, players))
+        if (DrawScore(score_row, p1.score, p2.score, p1.lives, p2.lives, players))
             return true;
 
 
@@ -489,12 +438,80 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
             {
                 if (ghosts[i].icon == 'R')
                 {
-                    unsigned int total = p1.score + (players == 2 ? p2.score : 0);
-                    int accel = (total / CurrentMap.RED_ACCEL_STEP) * CurrentMap.RED_ACCEL;
+                    int accel = (points / CurrentMap.RED_ACCEL_STEP) * CurrentMap.RED_ACCEL;
                     ghosts[i].tickPerMove = std::max(CurrentMap.GHOST_TICK_BASE - accel, CurrentMap.GHOST_TICK_MIN);
                     lastTickSpeed = ghosts[i].tickPerMove;
                 }
                 MoveOneGhost(ghosts, i, p1, p2, players, p1Alive, p2Alive);
+            }
+        }
+
+        for (int i = 0; i < ghosts.size(); i++)
+        {
+            int px_old = p1.x - p1.dx;
+            int py_old = p1.y - p1.dy;
+            int gx_old = ghosts[i].x - ghosts[i].dx;
+            int gy_old = ghosts[i].y - ghosts[i].dy;
+
+            if (((ghosts[i].x == p1.x && ghosts[i].y == p1.y) || (ghosts[i].x == px_old && ghosts[i].y == py_old && gx_old == p1.x && gy_old == p1.y)) && p1Alive && ghosts[i].icon != '0') //Поймали первого игрока
+            {
+                if (!scared || (ghosts[i].icon != 'S'))
+                {
+                    if (p1.lives == 0)
+                    {
+                        p1Alive = false;
+                        GoToxy(50, CurrentMap.layout.size() / 2);
+                        std::cout << "PLAYER 1 CAUGHT!";
+                        Sleep(1000);
+                    }
+                    else
+                    {
+                        --p1.lives;
+                        Respawn(p1, players);
+                        Respawn(p2, players);
+                    }
+                }
+                else
+                {
+                    catched++;
+                    p1.score += 40 * (catched + 1);
+                    ghosts[i].recalling = true;
+                    ghosts[i].beEaten = true;
+                    ghosts[i].icon = '0';
+                    ghosts[i].tickPerMove = CurrentMap.GHOST_TICK_MIN;
+                }
+            }
+
+
+            px_old = p2.x - p2.dx;
+            py_old = p2.y - p2.dy;
+
+            if (players == 2 && ((ghosts[i].x == p2.x && ghosts[i].y == p2.y) || (ghosts[i].x == px_old && ghosts[i].y == py_old && gx_old == p2.x && gy_old == p2.y)) && p2Alive && ghosts[i].icon != '0') //Поймали второго игрока
+            {
+                if (!scared || (ghosts[i].icon != 'S'))
+                {
+                    if (p2.lives == 0)
+                    {
+                        p2Alive = false;
+                        GoToxy(50, CurrentMap.layout.size() / 2 + 1);
+                        std::cout << "PLAYER 2 CAUGHT!";
+                        Sleep(1000);
+                    }
+                    {
+                        --p2.lives;
+                        Respawn(p1, players);
+                        Respawn(p2, players);
+                    }
+                }
+                else
+                {
+                    catched++;
+                    p2.score += 40 * (catched + 1);
+                    ghosts[i].recalling = true;
+                    ghosts[i].beEaten = true;
+                    ghosts[i].icon = '0';
+                    ghosts[i].tickPerMove = CurrentMap.GHOST_TICK_MIN;
+                }
             }
         }
 
@@ -509,9 +526,9 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
     return false;
 }
 
-void Respawn(Player& Player){
-    Player.x = 4;
-    Player.y = 1;
+void Respawn(Player& Player, int players){
+    Player.x = ( players == 2 ? CurrentMap.HOME_PLAYER_2[0] : CurrentMap.HOME_PLAYER_1[0]);
+    Player.y = ( players == 2 ? CurrentMap.HOME_PLAYER_2[1] : CurrentMap.HOME_PLAYER_1[1]);
     Player.dx = 1;
     Player.dy = 0;
 }

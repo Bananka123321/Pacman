@@ -32,8 +32,8 @@ int main()
 
             DrawFruitDescriptions();
             
-            int x1 = 4, y1 = 1;
-            int x2 = 4, y2 = 1;
+            int x1 = CurrentMap.HOME_PLAYER_1[0], y1 = CurrentMap.HOME_PLAYER_1[1];
+            int x2 = CurrentMap.HOME_PLAYER_2[0], y2 = CurrentMap.HOME_PLAYER_2[1];
 
             if (!Movement(players, x1, y1, x2, y2)) {
                 break; //Возвращаемся в главное меню
