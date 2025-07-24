@@ -4,7 +4,6 @@
 
 struct MapData { //Структура карт, содержащая переменные для динамического геймплея
     std::vector<std::string> layout;
-    int points;
 
     int PLAYER_TICK_BASE;      // задержка игрока
     int GHOST_TICK_BASE;       // базовая задержка призраков
