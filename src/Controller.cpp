@@ -10,6 +10,7 @@ unsigned int points = 0;
 unsigned int frameCount = 0;
 unsigned int startHunt = 0;
 unsigned int catched = 0;
+unsigned int finishScore = 0;
 
 bool scared = false;
 
@@ -20,10 +21,6 @@ int offsetY = 0;
 
 const int GAME_TICK = 10;       // минимальная задержка игры
 const int RECALL = 1;           // задержка призрака при его смерти
-
-//Координаты базы
-const int baseX = 15;
-const int baseY = 10;
 
 int lastTickSpeed = CurrentMap.GHOST_TICK_BASE; // задержка до возращения на базу
 
@@ -67,7 +64,16 @@ bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int live
         std::cout << "Lives: " << lives1 + 1 << "   Lives: " << lives2 + 1;
     }
     if (points == totalDots)
-    {
+    {   
+        if (finishScore == 9)
+        {
+            finishScore = score1 + score2;
+        }
+        else
+        {
+            finishScore++;
+        }
+        
         system("cls");
         GoToxy(0, CurrentMap.layout.size() / 2);
         std::cout << "CONGRATULATIONS!";
@@ -95,19 +101,21 @@ void CollectPoint(Player &p, std::vector<std::string> &level)
         ++p.lives;
 }
 
-void CollectBuster(Player &p, std::vector<std::string> &level, std::vector<Ghost> ghosts)
+void CollectBuster(Player &p, std::vector<std::string> &level, std::vector<Ghost> &ghosts)
 {
     if (level[p.y][p.x] == '%')
     {
         level[p.y][p.x] = ' ';
         p.score += 5;
-        scared = true;
         startHunt = frameCount; 
+        scared = true;
+        for (int i; i < ghosts.size(); i++)
+        {
+            ghosts[i].beEaten = false;
+        }
     }
-    for (int i; i < ghosts.size(); i++)
-    {
-        ghosts[i].beEaten = false;
-    }
+
+    
 }
 
 void GoToxy(int x, int y)
@@ -246,8 +254,8 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
     else if (g.recalling)
     {
     //Двигаемся в сторону базы
-    int dxToBase = baseX - g.x;
-    int dyToBase = baseY - g.y;
+    int dxToBase = CurrentMap.HOME_RED[0] - g.x;
+    int dyToBase = CurrentMap.HOME_RED[1] - g.y;
 
     //Выбираем шаг в сторону базы (манхэттен)
     if (abs(dxToBase) > abs(dyToBase))
@@ -283,7 +291,7 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
     g.y += g.dy;
 
     // Проверяем достижение базы
-    if (g.x == baseX && g.y == baseY)
+    if (g.x == CurrentMap.HOME_RED[0] && g.y == CurrentMap.HOME_RED[1])
     {
         if (g.recalling)
         {
@@ -315,6 +323,11 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
                  -1, 0, 'X'};
     bool p1Alive = (p1.lives > 0), p2Alive = (players == 2 && p2.lives > 0);
 
+    scared = false;
+    frameCount = 0;
+    score = 0;
+    catched = 0;
+    startHunt = 0;
 
     std::vector<Ghost> ghosts = {{CurrentMap.HOME_RED[0], CurrentMap.HOME_RED[1], 0, 0, 'R', false, false, CurrentMap.GHOST_TICK_BASE, 0}};  //Red
 
@@ -470,9 +483,22 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
                     }
                     else
                     {
+                        scared = false;
+                        GoToxy(p1.x,p1.y);
+                        std::cout << ' ';
+                        GoToxy(p2.x,p2.y);
+                        std::cout << ' ';
+                        for(int i = 0; i < ghosts.size(); i++)
+                        {   
+                            ghosts[i].beEaten = false;
+                            GoToxy(ghosts[i].x,ghosts[i].y);
+                            std::cout << ' ';  
+                        }
+                        Respawn(ghosts);
                         --p1.lives;
                         Respawn(p1, players);
-                        Respawn(p2, players);
+                        if (players == 2)
+                            Respawn(p2, players);
                     }
                 }
                 else
@@ -502,6 +528,18 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
                         Sleep(1000);
                     }
                     {
+                        scared = false;
+                        GoToxy(p1.x,p1.y);
+                        std::cout << ' ';
+                        GoToxy(p2.x,p2.y);
+                        std::cout << ' ';
+                        for(int i = 0; i < ghosts.size(); i++)
+                        {
+                            GoToxy(ghosts[i].x,ghosts[i].y);
+                            std::cout << ' ';
+                            
+                        }
+                        Respawn(ghosts);
                         --p2.lives;
                         Respawn(p1, players);
                         Respawn(p2, players);
@@ -528,6 +566,18 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
         Sleep(GAME_TICK);
     }
     return false;
+}
+
+void Respawn(std::vector<Ghost>& ghosts)
+{   
+    for(int i = 0; i < (ghosts.size() - 1); i++)
+        ghosts.pop_back();
+    frameCount = 0;
+    scared = false;
+    ghosts[0].x = CurrentMap.HOME_RED[0];
+    ghosts[0].y = CurrentMap.HOME_RED[1];
+    ghosts[0].dx = -1;
+    ghosts[0].dy = 0;
 }
 
 void Respawn(Player& Player, int players){

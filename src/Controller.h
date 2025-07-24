@@ -4,6 +4,8 @@
 
 extern unsigned int score;
 extern unsigned int frameCount;
+extern unsigned int finishScore;
+
 
 void GoToxy(int x, int y);
 bool IsWall(int x, int y);//Проверяет есть ли стена
@@ -41,4 +43,5 @@ long GetConsoleHeight();
 extern int offsetX;
 extern int offsetY;
 
+void Respawn(std::vector<Ghost>& ghosts);
 void Respawn(Player& Player, int players);//Респавн игрока в начале карты, если есть жизни
