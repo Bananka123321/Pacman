@@ -24,10 +24,10 @@ int main()
             CurrentMapIndex++;
             if (CurrentMapIndex >= AllMaps.size()) {
                 system("cls");
-                std::cout << "!!!!!!!!CONGRATULATIONS!!!!!!!!\n\n" << "YOU COMPLETE THIS GAME\n\n" << "YOU SCORE: " << finishScore << "\n\n\n" << "PRESS ENTER TO RESTART";
+                std::cout << "!!!!!!!!CONGRATULATIONS!!!!!!!!\n\n" << "YOU COMPLETE THIS GAME\n\n";
                 while(!(GetAsyncKeyState(VK_RETURN) & 0x8000))
                 {
-                    
+
                 }
                 break; //Возвращаемся в меню
             }

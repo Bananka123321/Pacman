@@ -4,7 +4,6 @@
 
 extern unsigned int score;
 extern unsigned int frameCount;
-extern unsigned int finishScore;
 
 
 void GoToxy(int x, int y);

@@ -10,7 +10,6 @@ unsigned int points = 0;
 unsigned int frameCount = 0;
 unsigned int startHunt = 0;
 unsigned int catched = 0;
-unsigned int finishScore = 0;
 
 bool scared = false;
 
@@ -64,15 +63,7 @@ bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int live
         std::cout << "Lives: " << lives1 + 1 << "   Lives: " << lives2 + 1;
     }
     if (points == totalDots)
-    {   
-        if (finishScore == 9)
-        {
-            finishScore = score1 + score2;
-        }
-        else
-        {
-            finishScore++;
-        }
+    {
         
         system("cls");
         GoToxy(0, CurrentMap.layout.size() / 2);
@@ -92,13 +83,25 @@ void CollectPoint(Player &p, std::vector<std::string> &level)
         points++;
     }
     else if (level[p.y][p.x] == 'C')
+    {
+        level[p.y][p.x] = ' ';
         p.score += 50;
+    }
     else if (level[p.y][p.x] == 'L')
+    {
+        level[p.y][p.x] = ' ';
         p.score += 100;
+    }
     else if (level[p.y][p.x] == 'G')
+    {
+        level[p.y][p.x] = ' ';
         p.score += 200;
+    }
     else if (level[p.y][p.x] == 'W' && p.lives < 2)
+    {   
+            level[p.y][p.x] = ' ';
         ++p.lives;
+    }   
 }
 
 void CollectBuster(Player &p, std::vector<std::string> &level, std::vector<Ghost> &ghosts)
