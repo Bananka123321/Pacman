@@ -17,7 +17,7 @@ int main()
         offsetX = GetConsoleWidth() / 2;
         offsetY = GetConsoleHeight() / 2;
         int players = Menu();//Выбор количества игроков
-        CurrentMapIndex = 8;//Сброс на первый уровень
+        CurrentMapIndex = -1;//Сброс на первый уровень
 
         while (true) //Цикл уровней
         {
@@ -44,7 +44,7 @@ int main()
 
             else {
                 system("cls");
-                GoToxy(50, CurrentMap.layout.size() / 2);
+                GoToxy(0, CurrentMap.layout.size() / 2);
                 std::cout << "LEVEL COMPLETE!";
                 Sleep(2000);
             }

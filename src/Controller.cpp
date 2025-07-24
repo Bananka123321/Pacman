@@ -69,7 +69,7 @@ bool DrawScore(int score_row, unsigned int score1, unsigned int score2, int live
     if (points == totalDots)
     {
         system("cls");
-        GoToxy(0, 0);
+        GoToxy(0, CurrentMap.layout.size() / 2);
         std::cout << "CONGRATULATIONS!";
         Sleep(5000);
         return true;
@@ -308,10 +308,11 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
 
 bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
 {
-    Player p1 = {x1, y1, 1, 0, '@', 0};
+    points = 0;//Сброс накопленных очков после каждой карты
+    Player p1 = {x1, y1, 1, 0, '@'};
     Player p2 = {players == 2 ? x2 : 0,
                  players == 2 ? y2 : 0,
-                 -1, 0, 'X', 0};
+                 -1, 0, 'X'};
     bool p1Alive = (p1.lives > 0), p2Alive = (players == 2 && p2.lives > 0);
 
 
