@@ -85,8 +85,6 @@ void DrawFruitDescriptions()//Пишет описание фруктов
     std::vector<std::pair<std::string, std::string>> fruits = {
         {"Cherry", "Gives +50 points"},
         {"Strawberry", "Gives +100 points"},
-        {"Orange", "Speeds you up briefly"},
-        {"Apple", "Slows ghosts temporarily"},
         {"Grapes", "Bonus +200 points"},
         {"Watermelon", "Extra life!"}
     };

@@ -287,13 +287,19 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
     {
         if (!scared)
         {
-            --p1.lives;
             if (p1.lives == 0)
             {
                 p1Alive = false;
                 GoToxy(50, CurrentMap.layout.size() / 2);
                 std::cout << "PLAYER 1 CAUGHT!";
                 Sleep(1000);
+            }
+            else
+            {
+                --p1.lives;
+                GoToxy(-offsetX, -offsetY);
+                std::cout << p1.lives;
+                Respawn(p1);
             }
         }
         else
@@ -315,11 +321,14 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
         {
             if (p2.lives == 0)
             {
-                --p2.lives;
                 p2Alive = false;
                 GoToxy(50, CurrentMap.layout.size() / 2 + 1);
                 std::cout << "PLAYER 2 CAUGHT!";
                 Sleep(1000);
+            }
+            {
+                --p2.lives;
+                Respawn(p2);
             }
         }
         else
@@ -330,13 +339,6 @@ void MoveOneGhost(std::vector<Ghost> &ghosts, size_t idx, Player &p1, Player &p2
             g.icon = '0';
             g.tickPerMove = CurrentMap.GHOST_TICK_MIN;
         }
-    }
-    if (!p1Alive && (!p2Alive || players == 1)) //Всех игроков поймали
-    { 
-        system("cls");
-        GoToxy(50, CurrentMap.layout.size() / 2);
-        std::cout << "GAME OVER!!!";
-        Sleep(5000);
     }
 
     //Перед выводом призрака восстанавливаем символ карты
@@ -466,6 +468,16 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
                 GoToxy(p2.x, p2.y);
                 std::cout << p2.icon;
             }
+            if (!p1Alive && (!p2Alive || players == 1))//Всех игроков поймали
+            { 
+                system("cls");
+                offsetX = GetConsoleWidth() / 2;
+                offsetY = GetConsoleHeight() / 2;
+                GoToxy(0,0);
+                std::cout << "GAME OVER!!!";
+                Sleep(5000);
+                return false;
+            }
         }
         if (DrawScore(score_row, p1.score, p2.score, players))
             return true;
@@ -497,5 +509,11 @@ bool Movement(int players, int &x1, int &y1, int &x2, int &y2)
     return false;
 }
 
+void Respawn(Player& Player){
+    Player.x = 4;
+    Player.y = 1;
+    Player.dx = 1;
+    Player.dy = 0;
+}
 
 /// Реализовать ворота или сделать выпуск призраков более предсказуесмым X - Так тоже шикос

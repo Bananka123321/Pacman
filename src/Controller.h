@@ -17,7 +17,7 @@ struct Player {
     char icon;
     unsigned int score = 0;//Счёт каждого игрока
     unsigned int points = 0; // съеденные точки
-    int lives = 3;//Количество жизней игроков
+    int lives = 2;//Количество жизней игроков, на 1 меньше, так как проверка на количество жизней идёт во время поимки а не после уменьшения количества жизней
 };
 
 struct Ghost {
@@ -40,3 +40,5 @@ long GetConsoleHeight();
 
 extern int offsetX;
 extern int offsetY;
+
+void Respawn(Player& Player);//Респавн игрока в начале карты, если есть жизни
